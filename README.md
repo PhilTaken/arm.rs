@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is a rusty rewrite of the Automatic Ripping Machine.
+This is a rusty rewrite of the [Automatic Ripping Machine](https://github.com/automatic-ripping-machine/automatic-ripping-machine).
 It aims to alleviate a few issues I had with setting it up
 as well as streamlining the codebase in a more structured manner.
 
