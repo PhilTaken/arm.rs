@@ -12,15 +12,25 @@
       in
         rec {
           # `nix build / nix run`
-          packages.hello-world = naersk-lib.buildPackage {
+          packages.arm-rs = naersk-lib.buildPackage {
             pname = "arm-rs";
             root = ./.;
+            nativeBuildInputs = [
+              pkgs.pkg-config
+            ];
+            buildInputs = [
+              pkgs.systemd
+            ];
           };
-          defaultPackage = packages.hello-world;
+          defaultPackage = packages.arm-rs;
 
           # `nix develop`
           devShell = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [ rustc cargo ];
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              systemd
+
+              rustc cargo cargo-edit ];
           };
         }
     );
