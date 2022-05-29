@@ -15,11 +15,11 @@ The general structure should be very close to the original ARM described in the 
 
 ## Roadmap:
 
-- [ ] Basic functionality
+- [x] Basic functionality
     - [x] hook into udev
     - [x] parse config
-    - [ ] identify type of disc inserted
-    - [ ] eject disks
+    - [x] identify type of disc inserted
+    - [x] eject disks
 
 
 - [ ] Core functionality

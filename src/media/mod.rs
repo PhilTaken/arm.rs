@@ -3,7 +3,8 @@
 mod video;
 mod data;
 
-use std::path::PathBuf;
+use std::{process::Command, ffi::OsStr};
+
 use anyhow::Error;
 use udev::Device;
 
@@ -14,27 +15,36 @@ use video::{VideoDisc, VideoType};
 use crate::config::Config;
 
 
-fn media_from_dev(dev: &Device) -> Box<dyn MediaType> {
-    let dpath = dev.devpath().to_os_string();
-    let res = VideoDisc::new(VideoType::Bluray, dpath);
-    Box::new(res)
+pub fn media_from_dev(dev: &Device) -> Option<Box<dyn MediaType>> {
+
+    //dev.properties().for_each(|attr| {
+        //println!("{:?}:\t{:?}", attr.name(), attr.value());
+    //});
+
+    if dev.property_value("ID_FS_USAGE").and_then(OsStr::to_str).is_some() {
+        println!("injected");
+        let dpath = dev.devnode().unwrap();
+        let disc: Box<dyn MediaType> = match dev.property_value("ID_CDROM_MEDIA_BD") {
+            Some(_) => Box::new(VideoDisc::new(VideoType::Bluray, dpath)),
+            None => {
+                match dev.property_value("ID_CDROM_MEDIA") {
+                    Some(_) => Box::new(VideoDisc::new(VideoType::Dvd, dpath)),
+                    None => Box::new(DataDisc::new(dpath)),
+                }
+            }
+        };
+        Some(disc)
+    } else {
+        println!("ejected");
+        None
+    }
 }
 
-trait MediaType {
-    fn rip(&self, config: &Config) -> Result<(), Error>;
+pub trait MediaType {
     fn process(&self, config: &Config) -> Result<(), Error>;
-}
+    fn path(&self) -> String;
 
-struct Media {
-    mtype: Box<dyn MediaType>,
-    path: PathBuf,
-}
-
-impl Media {
-    pub fn new(dev: &Device) -> Self {
-        Self {
-            mtype: media_from_dev(dev),
-            path: dev.devpath().into()
-        }
+    fn eject(&self) {
+        Command::new("eject").spawn().unwrap();
     }
 }
