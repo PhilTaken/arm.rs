@@ -7,6 +7,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, naersk, fenix, ... }@inputs:
+    #flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: let
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {
         inherit system;
@@ -21,21 +22,42 @@
         rustc = rust;
       };
     in rec {
-      # `nix build / nix run`
-      packages.arm-rs = naersk-lib.buildPackage {
-        pname = "arm-rs";
-        root = ./.;
-        nativeBuildInputs = [
-          pkgs.pkg-config
-        ];
-        buildInputs = [
-          pkgs.systemd
-        ];
+      # `nix build`
+      packages = rec {
+        arm-rs = naersk-lib.buildPackage {
+          pname = "arm-rs";
+          root = ./.;
+          nativeBuildInputs = [
+            pkgs.pkg-config
+          ];
+          buildInputs = [
+            pkgs.systemd
+          ];
+          doCheck = true;
+          cargoTestCommands = x:
+            x ++ [
+              # clippy
+              ''cargo clippy --all --all-features --tests -- \
+                -D clippy::pedantic \
+                -D warnings \
+                -A clippy::module-name-repetitions \
+                -A clippy::too-many-lines \
+                -A clippy::cast-possible-wrap \
+                -A clippy::cast-possible-truncation \
+                -A clippy::nonminimal_bool''
+            ];
+        };
+        default = arm-rs;
       };
-      defaultPackage = packages.arm-rs;
+
+      # `nix run`
+      apps = rec {
+        arm-rs = flake-utils.lib.mkApp { drv = packages.arm-rs; };
+        default = arm-rs;
+      };
 
       # `nix develop`
-      devShell = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
         inputsFrom = [
           packages.arm-rs
         ];
@@ -44,6 +66,11 @@
           rust
           pkgs.cargo-edit
         ];
+      };
+
+      # `nix flake check`
+      checks = {
+        buildPack = packages.arm-rs;
       };
     }
   );

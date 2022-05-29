@@ -21,6 +21,7 @@ fn media_from_dev(dev: &Device) -> Box<dyn MediaType> {
 }
 
 trait MediaType {
+    fn rip(&self, config: &Config) -> Result<(), Error>;
     fn process(&self, config: &Config) -> Result<(), Error>;
 }
 
@@ -30,9 +31,9 @@ struct Media {
 }
 
 impl Media {
-    pub fn new(dev: Device) -> Self {
+    pub fn new(dev: &Device) -> Self {
         Self {
-            mtype: media_from_dev(&dev),
+            mtype: media_from_dev(dev),
             path: dev.devpath().into()
         }
     }

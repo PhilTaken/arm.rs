@@ -15,23 +15,21 @@ impl DataDisc {
     pub fn new(path: OsString) -> Self {
         Self { path }
     }
-
-    pub fn rip(&self, config: &Config) -> Result<(), Error> {
-        todo!("implement")
-    }
-
-    pub fn encode(&self, config: &Config) -> Result<(), Error> {
-        todo!("implement")
-    }
 }
 
 impl MediaType for DataDisc {
+    #[allow(clippy::all)]
+    fn rip(&self, config: &Config) -> Result<(), Error> {
+        todo!("implement")
+    }
+
+    #[allow(clippy::all)]
     fn process(&self, config: &Config) -> Result<(), Error> {
-        self.rip(config);
-        self.encode(config);
+        //self.rip(config);
+        //self.encode(config);
+        //Ok(())
 
         todo!("implement");
-        Ok(())
     }
 }
 

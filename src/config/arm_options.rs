@@ -14,6 +14,7 @@ fn default_date_format() -> String { "%m-%d-%Y %H:%M:%S".into() }
 fn default_name() -> String { "default".into() }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct ArmOptions {
     #[serde(default = "default_name")]
     name: String,

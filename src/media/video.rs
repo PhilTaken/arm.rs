@@ -22,27 +22,30 @@ impl VideoDisc {
         Self { vtype, path }
     }
 
-    pub fn rip(&self, config: &Config) -> Result<(), Error> {
-        todo!("implement")
-    }
-
+    #[allow(clippy::unused_self)]
     pub fn encode(&self, config: &Config) -> Result<(), Error> {
         todo!("implement")
     }
 
     // identify media using online sources (optional)
+    #[allow(clippy::unused_self)]
     pub fn identify(&self, config: &Config) {
         todo!("implement")
-
     }
 }
 
 impl MediaType for VideoDisc {
-    fn process(&self, config: &Config) -> Result<(), Error> {
-        self.rip(config);
-        self.encode(config);
+    #[allow(clippy::all)]
+    fn rip(&self, config: &Config) -> Result<(), Error> {
+        todo!("implement")
+    }
 
+    #[allow(clippy::all)]
+    fn process(&self, config: &Config) -> Result<(), Error> {
         todo!("implement");
-        Ok(())
+        //self.rip(config);
+        //self.encode(config);
+
+        //Ok(())
     }
 }
