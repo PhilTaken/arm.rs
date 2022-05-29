@@ -1,6 +1,8 @@
 .envrc
 tags
 .direnv
+*log.txt
+config.toml
 
 
 # Added by cargo
