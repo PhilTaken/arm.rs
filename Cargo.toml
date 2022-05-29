@@ -8,6 +8,11 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.57"
 udev = "0.6.3"
+toml = "0.5.9"
+
+[dependencies.serde]
+version = "1.0.37"
+features = ["derive"]
 
 [dependencies.mio]
 version = "0.8.3"
