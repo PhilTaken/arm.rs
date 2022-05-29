@@ -7,8 +7,8 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, naersk, fenix, ... }@inputs:
-    #flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: let
-    flake-utils.lib.eachDefaultSystem (system: let
+    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: let
+    #flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {
         inherit system;
         overlays = [ fenix.overlay ];
@@ -21,32 +21,30 @@
         cargo = rust;
         rustc = rust;
       };
+
+      packWithTests = doCheck: naersk-lib.buildPackage {
+        inherit doCheck;
+        pname = "arm-rs";
+        root = ./.;
+        nativeBuildInputs = [ pkgs.pkg-config ];
+        buildInputs = [ pkgs.systemd ];
+        cargoTestCommands = x:
+          x ++ [
+            # clippy
+            ''cargo clippy --all --all-features --tests -- \
+              -D clippy::pedantic \
+              -D warnings \
+              -A clippy::module-name-repetitions \
+              -A clippy::too-many-lines \
+              -A clippy::cast-possible-wrap \
+              -A clippy::cast-possible-truncation \
+              -A clippy::nonminimal_bool''
+          ];
+      };
     in rec {
       # `nix build`
       packages = rec {
-        arm-rs = naersk-lib.buildPackage {
-          pname = "arm-rs";
-          root = ./.;
-          nativeBuildInputs = [
-            pkgs.pkg-config
-          ];
-          buildInputs = [
-            pkgs.systemd
-          ];
-          doCheck = true;
-          cargoTestCommands = x:
-            x ++ [
-              # clippy
-              ''cargo clippy --all --all-features --tests -- \
-                -D clippy::pedantic \
-                -D warnings \
-                -A clippy::module-name-repetitions \
-                -A clippy::too-many-lines \
-                -A clippy::cast-possible-wrap \
-                -A clippy::cast-possible-truncation \
-                -A clippy::nonminimal_bool''
-            ];
-        };
+        arm-rs = packWithTests false;
         default = arm-rs;
       };
 
@@ -70,7 +68,7 @@
 
       # `nix flake check`
       checks = {
-        buildPack = packages.arm-rs;
+        buildPack = packWithTests true;
       };
     }
   );
