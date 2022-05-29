@@ -20,7 +20,10 @@ fn default_one() -> i32 { 1 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
+    #[serde(default)]
     arm: ArmOptions,
+
+    //#[serde(default)]
     directories: DirectoryOptions,
 
     #[serde(default)]
@@ -29,15 +32,19 @@ pub struct Config {
     #[serde(default)]
     handbrake: HandBrakeOptions,
 
-    web_server: Option<WebServerOptions>,
+    #[serde(default)]
     notifications: Option<NotificationOptions>,
+
+    #[serde(default)]
+    web_server: Option<WebServerOptions>,
+
+    #[serde(default)]
     file_permissions: Option<FilePermissionOptions>,
 }
 
 impl Config {
     pub fn parse(conf: &str) -> Result<Self, Error> {
-        let config: Config = toml::from_str(conf)?;
-        Ok(config)
+        Ok(toml::from_str(conf)?)
     }
 }
 
@@ -52,4 +59,18 @@ struct FilePermissionOptions {
     set_media_owner: bool,
     chown_user: String,
     chown_group: String,
+}
+
+
+#[test]
+fn minimal_config() {
+    let testconf = r#"
+        [directories]
+        raw_rips_path = ""
+        transcode_files_path = ""
+        completed_files_path = ""
+    "#;
+
+    let armconf = Config::parse(testconf);
+    assert!(armconf.is_ok());
 }

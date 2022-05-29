@@ -86,4 +86,29 @@ enum AudioMetadataProvider { #[default] MusicBrainz, FreeCDDB, None }
 #[derive(Debug, Serialize, Deserialize, Default)]
 enum VideoType { #[default] Auto, Series, Movie }
 
-
+impl Default for ArmOptions {
+    fn default() -> Self {
+        Self {
+            name: default_name(),
+            children: Vec::default(),
+            prevent_99: default_true(),
+            check_udf: default_true(),
+            get_video_title: default_true(),
+            api_key: Option::default(),
+            disable_login: default_true(),
+            skip_transcode: default_false(),
+            videotype: VideoType::default(),
+            minlength: default_minlength(),
+            maxlength: default_maxlength(),
+            manual_wait: default_true(),
+            manual_wait_time: default_waittime(),
+            date_format: default_date_format(),
+            allow_duplicates: default_true(),
+            max_concurrent_transcodes: default_one(),
+            data_rip_parameters: Vec::default(),
+            video_metadata_provider: VideoMetadataProvider::default(),
+            audio_metadata_provider: AudioMetadataProvider::default(),
+            rip_posters: default_false()
+        }
+    }
+}
