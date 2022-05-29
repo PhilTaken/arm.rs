@@ -1,3 +1,5 @@
+use std::fs;
+
 use anyhow::Error;
 use serde::{Serialize, Deserialize};
 
@@ -43,8 +45,24 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn parse(conf: &str) -> Result<Self, Error> {
+    #[allow(dead_code)]
+    pub fn parse_file(filename: &str) -> Result<Self, Error> {
+        let conf = fs::read_to_string(filename)?;
+        Self::parse_str(&conf)
+    }
+
+    pub fn parse_str(conf: &str) -> Result<Self, Error> {
         Ok(toml::from_str(conf)?)
+    }
+
+    #[allow(dead_code)]
+    pub fn minimal() -> Result<Self, Error> {
+        Self::parse_str(r#"
+            [directories]
+            raw_rips_path = ""
+            transcode_files_path = ""
+            completed_files_path = ""
+        "#)
     }
 }
 
@@ -64,13 +82,6 @@ struct FilePermissionOptions {
 
 #[test]
 fn minimal_config() {
-    let testconf = r#"
-        [directories]
-        raw_rips_path = ""
-        transcode_files_path = ""
-        completed_files_path = ""
-    "#;
-
-    let armconf = Config::parse(testconf);
+    let armconf = Config::minimal();
     assert!(armconf.is_ok());
 }
