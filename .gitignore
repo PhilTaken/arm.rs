@@ -1,7 +1,7 @@
 .envrc
 tags
 .direnv
-*log.txt
+logs/
 config.toml
 
 
