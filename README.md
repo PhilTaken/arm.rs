@@ -17,7 +17,7 @@ The general structure should be very close to the original ARM described in the 
 
 - [ ] Basic functionality
     - [x] hook into udev
-    - [ ] parse config
+    - [x] parse config
     - [ ] identify type of disc inserted
     - [ ] eject disks
 
