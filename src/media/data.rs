@@ -1,6 +1,6 @@
 #![allow(unused_variables)]
 
-use std::ffi::OsString;
+use std::path::{Path, PathBuf};
 use anyhow::Error;
 use crate::media::MediaType;
 use crate::config::Config;
@@ -8,28 +8,27 @@ use crate::config::Config;
 // ----------------------------------------------------------
 
 pub struct DataDisc {
-    path: OsString,
+    path: PathBuf,
 }
 
 impl DataDisc {
-    pub fn new(path: OsString) -> Self {
-        Self { path }
+    pub fn new(path: &Path) -> Self {
+        Self { path: path.to_path_buf() }
     }
 }
 
 impl MediaType for DataDisc {
-    #[allow(clippy::all)]
-    fn rip(&self, config: &Config) -> Result<(), Error> {
-        todo!("implement")
-    }
-
-    #[allow(clippy::all)]
+    #[allow(clippy::unused_self)]
     fn process(&self, config: &Config) -> Result<(), Error> {
         //self.rip(config);
         //self.encode(config);
         //Ok(())
 
         todo!("implement");
+    }
+
+    fn path(&self) -> String {
+        self.path.to_str().unwrap().to_string()
     }
 }
 

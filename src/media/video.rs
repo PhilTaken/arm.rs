@@ -1,25 +1,32 @@
 #![allow(unused_variables)]
 
-use std::ffi::OsString;
+use std::path::{Path, PathBuf};
 use anyhow::Error;
 use crate::media::MediaType;
 use crate::config::Config;
 
 // ----------------------------------------------------------
 
+#[derive(Debug, Clone)]
 pub enum VideoType {
     Bluray,
     Dvd
 }
 
+#[derive(Debug, Clone)]
 pub struct VideoDisc {
     vtype: VideoType,
-    path: OsString,
+    path: PathBuf,
 }
 
 impl VideoDisc {
-    pub fn new(vtype: VideoType, path: OsString) -> Self {
-        Self { vtype, path }
+    pub fn new(vtype: VideoType, path: &Path) -> Self {
+        Self { vtype, path: path.to_path_buf() }
+    }
+
+    #[allow(clippy::unused_self)]
+    pub fn rip(&self, config: &Config) -> Result<(), Error> {
+        todo!("implement")
     }
 
     #[allow(clippy::unused_self)]
@@ -36,16 +43,15 @@ impl VideoDisc {
 
 impl MediaType for VideoDisc {
     #[allow(clippy::all)]
-    fn rip(&self, config: &Config) -> Result<(), Error> {
-        todo!("implement")
-    }
-
-    #[allow(clippy::all)]
     fn process(&self, config: &Config) -> Result<(), Error> {
         todo!("implement");
         //self.rip(config);
         //self.encode(config);
 
         //Ok(())
+    }
+
+    fn path(&self) -> String {
+        self.path.to_str().unwrap().to_string()
     }
 }
