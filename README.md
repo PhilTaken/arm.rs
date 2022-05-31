@@ -25,6 +25,7 @@ The general structure should be very close to the original ARM described in the 
 - [ ] Core functionality
     - [ ] rip discs   (MakeMKV)
     - [ ] encode rips (HandBrake)
+    - [ ] proper logging
 
 
 - [ ] Additional functionality
