@@ -15,7 +15,7 @@ use video::{VideoDisc, VideoType};
 use crate::config::Config;
 
 
-/// Derives a MediaType from the given udev Device
+/// Derives a `MediaType` from the given udev Device
 ///
 /// # Arguments
 ///
