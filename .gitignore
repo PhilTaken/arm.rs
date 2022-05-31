@@ -3,9 +3,9 @@ tags
 .direnv
 logs/
 config.toml
-
+result
+result-doc
 
 # Added by cargo
 
 /target
-result

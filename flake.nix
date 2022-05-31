@@ -23,9 +23,13 @@
       };
 
       packWithTests = doCheck: naersk-lib.buildPackage {
-        inherit doCheck;
         pname = "arm-rs";
         root = ./.;
+
+        inherit doCheck;
+        doDoc = true;
+        doDocFail = true;
+
         nativeBuildInputs = [ pkgs.pkg-config ];
         buildInputs = [ pkgs.systemd ];
         cargoTestCommands = x:
@@ -46,6 +50,7 @@
       packages = rec {
         arm-rs = packWithTests false;
         default = arm-rs;
+        doc = arm-rs.doc;
       };
 
       # `nix run`

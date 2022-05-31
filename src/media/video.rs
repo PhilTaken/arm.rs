@@ -44,6 +44,7 @@ impl VideoDisc {
 impl MediaType for VideoDisc {
     #[allow(clippy::all)]
     fn process(&self, config: &Config) -> Result<(), Error> {
+        //if config.arm.
         todo!("implement");
         //self.rip(config);
         //self.encode(config);

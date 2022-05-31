@@ -22,26 +22,32 @@ fn default_one() -> i32 { 1 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
+    /// core options, optional
     #[serde(default)]
-    arm: ArmOptions,
+    pub arm: ArmOptions,
 
-    //#[serde(default)]
-    directories: DirectoryOptions,
+    /// directory setup, needs to be set
+    pub directories: DirectoryOptions,
 
+    /// config for running MakeMKV, a Disc ripping program, optional
     #[serde(default)]
-    make_mkv: MakeMKVOptions,
+    pub make_mkv: MakeMKVOptions,
 
+    /// config for runnig HandBrake, a video encoder, optional
     #[serde(default)]
-    handbrake: HandBrakeOptions,
+    pub handbrake: HandBrakeOptions,
 
+    /// config for notifications, optional
     #[serde(default)]
-    notifications: Option<NotificationOptions>,
+    pub notifications: Option<NotificationOptions>,
 
+    /// config for the web server (wip), optional
     #[serde(default)]
-    web_server: Option<WebServerOptions>,
+    pub web_server: Option<WebServerOptions>,
 
+    /// config for setting file / directory permissions, optional
     #[serde(default)]
-    file_permissions: Option<FilePermissionOptions>,
+    pub file_permissions: FilePermissionOptions,
 }
 
 impl Config {
@@ -68,15 +74,27 @@ impl Config {
 
 
 #[derive(Debug, Serialize, Deserialize)]
-struct WebServerOptions { ip: String, port: i32 }
+pub struct WebServerOptions { ip: String, port: i32 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct FilePermissionOptions {
-    set_media_permissions: bool,
-    chmod_value: i32,
-    set_media_owner: bool,
-    chown_user: String,
-    chown_group: String,
+pub struct FilePermissionOptions {
+    pub set_media_permissions: bool,
+    pub chmod_value: i32,
+    pub set_media_owner: bool,
+    pub chown_user: String,
+    pub chown_group: String,
+}
+
+impl Default for FilePermissionOptions {
+    fn default() -> Self {
+        Self {
+            set_media_permissions: false,
+            chmod_value: 777,
+            set_media_owner: false,
+            chown_user: "".into(),
+            chown_group: "".into(),
+        }
+    }
 }
 
 

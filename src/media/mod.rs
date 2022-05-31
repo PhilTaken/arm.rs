@@ -15,12 +15,14 @@ use video::{VideoDisc, VideoType};
 use crate::config::Config;
 
 
+/// Derives a MediaType from the given udev Device
+///
+/// # Arguments
+///
+/// * `dev` - the udev device to handle
 pub fn media_from_dev(dev: &Device) -> Option<Box<dyn MediaType>> {
 
-    //dev.properties().for_each(|attr| {
-        //println!("{:?}:\t{:?}", attr.name(), attr.value());
-    //});
-
+    // ID_FS_USAGE is only set when a disc is in the drive
     if dev.property_value("ID_FS_USAGE").and_then(OsStr::to_str).is_some() {
         println!("injected");
         let dpath = dev.devnode().unwrap();
@@ -40,10 +42,15 @@ pub fn media_from_dev(dev: &Device) -> Option<Box<dyn MediaType>> {
     }
 }
 
+/// represents any type of Disc inserted into your drive
 pub trait MediaType {
+    /// process the medium, a rip in most cases
     fn process(&self, config: &Config) -> Result<(), Error>;
+
+    /// get the discs devnode
     fn path(&self) -> String;
 
+    /// eject the disc
     fn eject(&self) {
         Command::new("eject").spawn().unwrap();
     }
