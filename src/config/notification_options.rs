@@ -14,26 +14,7 @@ pub struct NotificationOptions {
     #[serde(default = "default_false")]
     jobid: bool,
 
-    #[serde(default)]
-    pushbullet: Option<SimpleNotificationOptions>,
-
-    #[serde(default)]
-    ifttt: Option<IFTTTOptions>,
-
-    #[serde(default)]
-    pushover: Option<PushOverOptions>,
-
-    #[serde(default)]
-    omdb: Option<SimpleNotificationOptions>,
-
-    #[serde(default)]
-    tmdb: Option<SimpleNotificationOptions>,
-
-    #[serde(default)]
-    json_url: Option<String>,
-
-    #[serde(default)]
-    apprise: Option<AppriseOptions>
+    // TODO: add notification backends
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.57"
 udev = "0.6.3"
 toml = "0.5.9"
+log = "0.4.17"
 
 [dependencies.serde]
 version = "1.0.37"

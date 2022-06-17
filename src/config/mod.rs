@@ -3,10 +3,10 @@ use std::fs;
 use anyhow::Error;
 use serde::{Serialize, Deserialize};
 
-mod arm_options;
-mod notification_options;
-mod dir_options;
-mod ext_options;
+pub mod arm_options;
+pub mod notification_options;
+pub mod dir_options;
+pub mod ext_options;
 
 use arm_options::ArmOptions;
 use notification_options::NotificationOptions;
@@ -41,10 +41,6 @@ pub struct Config {
     #[serde(default)]
     pub notifications: Option<NotificationOptions>,
 
-    /// config for the web server (wip), optional
-    #[serde(default)]
-    pub web_server: Option<WebServerOptions>,
-
     /// config for setting file / directory permissions, optional
     #[serde(default)]
     pub file_permissions: FilePermissionOptions,
@@ -72,9 +68,6 @@ impl Config {
     }
 }
 
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WebServerOptions { ip: String, port: i32 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FilePermissionOptions {
