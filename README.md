@@ -23,11 +23,11 @@ The general structure should be very close to the original ARM described in the 
 
 
 - [ ] Core functionality
-    - [ ] rip discs   (MakeMKV)
+    - [x] rip discs   (MakeMKV)
     - [ ] encode rips (HandBrake)
-    - [ ] proper logging
 
 
 - [ ] Additional functionality
+    - [ ] proper logging
     - [ ] send notifications (matrix/apprise/discord/etc.)
     - [ ] (webinterface)
