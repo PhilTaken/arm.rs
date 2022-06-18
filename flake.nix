@@ -12,6 +12,7 @@
       pkgs = import nixpkgs {
         inherit system;
         overlays = [ fenix.overlay ];
+        config.allowUnfree = true;
       };
       rust = pkgs.fenix.fromToolchainFile {
         file = ./rust-toolchain.toml;
@@ -61,8 +62,10 @@
 
       # `nix develop`
       devShells.default = pkgs.mkShell {
-        inputsFrom = [
+        inputsFrom = with pkgs; [
           packages.arm-rs
+          handbrake
+          makemkv
         ];
 
         nativeBuildInputs = [
