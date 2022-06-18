@@ -13,16 +13,19 @@ fn default_extension() -> String { "m4v".into() }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MakeMKVOptions {
     #[serde(default)]
-    ripmethod: RipMethod,
+    pub ripmethod: RipMethod,
 
     #[serde(default)]
-    mkv_args: Vec<String>,
+    pub mkv_bin: Option<String>,
+
+    #[serde(default)]
+    pub mkv_args: Vec<String>,
 
     #[serde(default = "default_true")]
-    delete_raw_files: bool,
+    pub delete_raw_files: bool,
 
     #[serde(default = "default_false")]
-    delete_hashed_keys: bool,
+    pub delete_hashed_keys: bool,
 }
 
 impl Default for MakeMKVOptions {
@@ -32,35 +35,36 @@ impl Default for MakeMKVOptions {
             mkv_args: Vec::default(),
             delete_raw_files: default_true(),
             delete_hashed_keys: default_false(),
+            mkv_bin: Option::default()
         }
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-enum RipMethod { #[default] Backup, Mkv }
+pub enum RipMethod { #[default] Backup, Mkv }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HandBrakeOptions {
     #[serde(default = "default_dvd_preset")]
-    preset_dvd: String,
+    pub preset_dvd: String,
 
     #[serde(default = "default_bluray_preset")]
-    preset_bluray: String,
+    pub preset_bluray: String,
 
     #[serde(default = "default_extension")]
-    extension: String,
+    pub extension: String,
 
     #[serde(default)]
-    binary: Option<String>,
+    pub binary: Option<String>,
 
     #[serde(default = "default_true")]
-    main_feature: bool,
+    pub main_feature: bool,
 
     #[serde(default)]
-    dvd_args: Vec<String>,
+    pub dvd_args: Vec<String>,
 
     #[serde(default)]
-    bluray_args: Vec<String>,
+    pub bluray_args: Vec<String>,
 }
 
 impl Default for HandBrakeOptions {
