@@ -3,7 +3,7 @@
 mod video;
 mod data;
 
-use std::{process::Command, ffi::OsStr};
+use std::{process::Command, ffi::OsStr, path::PathBuf};
 
 use anyhow::Error;
 use udev::Device;
@@ -47,7 +47,7 @@ pub fn media_from_dev(dev: &Device) -> Option<Box<dyn MediaType>> {
 /// represents any type of Disc inserted into your drive
 pub trait MediaType {
     /// process the medium, a rip in most cases
-    fn process(&mut self, config: &Config) -> Result<(), Error>;
+    fn process(&mut self, device: &Device, config: &Config) -> Result<PathBuf, Error>;
 
     /// get the discs devnode
     fn path(&self) -> String;

@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate anyhow;
+
 mod media;
 mod config;
 mod devices;

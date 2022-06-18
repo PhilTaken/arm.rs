@@ -2,6 +2,7 @@
 
 use std::path::{Path, PathBuf};
 use anyhow::Error;
+use udev::Device;
 use crate::media::MediaType;
 use crate::config::Config;
 
@@ -19,7 +20,7 @@ impl DataDisc {
 
 impl MediaType for DataDisc {
     #[allow(clippy::unused_self)]
-    fn process(&mut self, config: &Config) -> Result<(), Error> {
+    fn process(&mut self, device: &Device, config: &Config) -> Result<PathBuf, Error> {
         //self.rip(config);
         //self.encode(config);
         //Ok(())
