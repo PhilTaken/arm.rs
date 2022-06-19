@@ -140,16 +140,16 @@ impl VideoDisc {
             config_args.push("--main-feature");
         }
         let extension = &config.extension;
-        let outfile = format!("{}.{}", self.title, &config.extension);
+        let outfile = finished_dir.join(format!("{}.{}", self.title, &config.extension));
 
         let infile = input_file.to_str().unwrap();
         Command::new(handbrakepath)
             .args(config_args)
             .args(extra_args)
-            .args(["-i", infile, "-o", &outfile])
+            .args(["-i", infile, "-o", outfile.to_str().unwrap()])
             // TODO: .stdout(logfile)
             .status()
-            .map(|_| PathBuf::from(outfile))
+            .map(|_| outfile)
             .map_err(|err| anyhow!(err))
     }
 
