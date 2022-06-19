@@ -6,7 +6,6 @@ use anyhow::Error;
 use crate::config::ext_options::{HandBrakeOptions, MakeMKVOptions, RipMethod};
 use crate::media::MediaType;
 use crate::config::Config;
-use std::{str, any};
 
 fn in_path(path: &str) -> Result<bool, std::env::VarError> {
     std::env::var("PATH").map(|paths| paths
@@ -84,7 +83,7 @@ impl VideoDisc {
             .args(["-r", "info", "disc:9999"])
             .output().unwrap()
             .stdout;
-        let discinfo = str::from_utf8(&cmdout).map_err(|_| anyhow!("failed to parse disc info"))?;
+        let discinfo = std::str::from_utf8(&cmdout).map_err(|_| anyhow!("failed to parse disc info"))?;
 
         // extract the disc number
         let discnr = discinfo.lines()
