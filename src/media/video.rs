@@ -91,7 +91,6 @@ impl VideoDisc {
             .split(',').next().unwrap()
             .split(':').last().unwrap();
 
-
         let discnr_arg = format!("disc:{}", discnr);
         let minlength_arg = format!("--minlength={}", minlength);
         let args = if config.ripmethod == RipMethod::Backup && self.vtype == VideoType::Bluray {
@@ -104,6 +103,7 @@ impl VideoDisc {
 
         Command::new(&makemkvpath)
             .args(args)
+            .args(config.mkv_args.clone())
             // TODO: .stdout(logfile)
             .status()
             .map(|_| outfile)
@@ -161,7 +161,7 @@ impl VideoDisc {
 }
 
 impl MediaType for VideoDisc {
-    /// process the Video Disc by first ripping it and then optionally encoding the ripped files
+    /// process the Video Disc by first ripping it and then optionally (wip) encoding the ripped files
     #[allow(clippy::all)]
     fn process(&mut self, config: &Config) -> Result<PathBuf, Error> {
         let ripdir = Path::new(&config.directories.raw_rips_path);
