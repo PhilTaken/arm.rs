@@ -40,7 +40,7 @@ impl Default for MakeMKVOptions {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub enum RipMethod { #[default] Backup, Mkv }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
