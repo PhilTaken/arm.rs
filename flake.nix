@@ -5,15 +5,18 @@
     fenix.url = "github:nix-community/fenix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, naersk, fenix, ... }@inputs:
-  flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: let
+  outputs = { self, nixpkgs, flake-utils, naersk, fenix, ... }@inputs: let
     pname = "arm-rs";
-    overlay = _: prev: {
+    overlays.default = _: prev: {
       ${pname} = prev.callPackage ./nix/default.nix { inherit naersk; };
     };
+  in {
+    inherit overlays;
+    nixosModules.default = import ./nix/module.nix;
+  } // flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: let
     pkgs = import nixpkgs {
       inherit system;
-      overlays = [ fenix.overlay overlay ];
+      overlays = [ fenix.overlay overlays.default ];
       config.allowUnfree = true;
     };
   in rec {
@@ -29,9 +32,6 @@
         ${pname} = flake-utils.lib.mkApp { drv = packages.${pname}; };
         default = apps.${pname};
       };
-
-      nixosModules.default = import ./nix/module.nix;
-      overlays.default = overlay;
 
       # `nix develop`
       devShells.default = pkgs.mkShell {
