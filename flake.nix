@@ -26,7 +26,7 @@
 
       # `nix run`
       apps = {
-        arm-rs = flake-utils.lib.mkApp { drv = packages.${pname}; };
+        ${pname} = flake-utils.lib.mkApp { drv = packages.${pname}; };
         default = apps.${pname};
       };
 
@@ -35,14 +35,12 @@
 
       # `nix develop`
       devShells.default = pkgs.mkShell {
-        inputsFrom = with pkgs; [
-          pkgs.${pname}
+        inputsFrom = [ pkgs.${pname} ];
+
+        nativeBuildInputs = with pkgs; [
+          cargo-edit
           handbrake
           makemkv
-        ];
-
-        nativeBuildInputs = [
-          pkgs.cargo-edit
         ];
       };
 
