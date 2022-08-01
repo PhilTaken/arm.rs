@@ -16,7 +16,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     let config = {
-        if let Some(configfile) = args.get(0) {
+        if let Some(configfile) = args.get(1) {
             Config::parse_file(configfile)
         } else {
             Config::minimal()
