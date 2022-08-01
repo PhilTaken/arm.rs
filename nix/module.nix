@@ -20,9 +20,13 @@ in {
       type = types.package;
       default = pkgs.arm-rs;
     };
+
+    # config for handbrake license, etc
   };
 
   config = mkIf cfg.enable {
+    boot.kernelModules = [ "sg" ];
+
     systemd.services.arm-rs = {
       description = "Arm-rs service";
       after = [ "network-online.target" ];
@@ -33,7 +37,7 @@ in {
         Group = "arm";
         Restart = "always";
 
-        ExecStart = "${cfg.package}/bin/arm-rs ${arm-src}/arm/runui.py";
+        ExecStart = "${cfg.package}/bin/arm-rs";
       };
     };
 
