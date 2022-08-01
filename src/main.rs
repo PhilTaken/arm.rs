@@ -6,7 +6,7 @@ mod config;
 mod devices;
 
 use core::time;
-use std::{thread, fs};
+use std::thread;
 
 use config::Config;
 
@@ -23,30 +23,24 @@ fn main() {
         }
     };
 
-    match config {
-        Ok(conf) => {
-            println!("parsed config, starting...");
+    #[allow(unused_variables)]
+    if let Ok(conf) = config {
+        println!("parsed config, starting...");
 
-            devices::poll(|event| {
-                match TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
-                    Ok(media) => {
+        devices::poll(|event| {
+            if let Ok(media) = TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
+                //let _ = media.process(&conf);
 
-                        //let _ = media.process(&conf);
+                println!("------------------------------------------------");
+                println!("{}: {}", media.path(), media.title());
 
-                        println!("------------------------------------------------");
-                        println!("{}: {}", media.path(), media.title());
+                thread::sleep(time::Duration::from_secs(2));
 
-                        thread::sleep(time::Duration::from_secs(2));
-
-                        println!("------------------------------------------------");
-                        media.eject();
-                    },
-                    _ => {}
-                }
-            });
-        }
-        Err(err) => {
-            panic!("error in config: {:?}", err);
-        }
+                println!("------------------------------------------------");
+                media.eject();
+            }
+        });
+    } else {
+        eprintln!("Error in config: {}", config.err().unwrap());
     }
 }
