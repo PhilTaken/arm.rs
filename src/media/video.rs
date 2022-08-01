@@ -51,9 +51,9 @@ impl VideoDisc {
     /// * `vtype` - the type of Video Disc
     /// * `path` - the device's devnode
     /// * `title` - the discs fs label
-    pub fn new(vtype: VideoType, path: &Path, title: String) -> Self {
+    pub fn new(vtype: VideoType, path: &Path, title: &str) -> Self {
         Self {
-            vtype, title, path: path.to_path_buf(), ..Self::default()
+            vtype, title: title.to_string(), path: path.to_path_buf(), ..Self::default()
         }
     }
 
@@ -174,5 +174,9 @@ impl MediaType for VideoDisc {
 
     fn path(&self) -> String {
         self.path.to_str().unwrap().to_string()
+    }
+
+    fn title(&self) -> String {
+        self.title.clone()
     }
 }

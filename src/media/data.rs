@@ -30,6 +30,10 @@ impl MediaType for DataDisc {
     fn path(&self) -> String {
         self.path.to_str().unwrap().to_string()
     }
+
+    fn title(&self) -> String {
+        "data disc".to_string()
+    }
 }
 
 // ----------------------------------------------------------

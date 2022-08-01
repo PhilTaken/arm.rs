@@ -6,32 +6,47 @@ mod config;
 mod devices;
 
 use core::time;
-use std::thread;
+use std::{thread, fs};
 
-use media::media_from_dev;
 use config::Config;
 
+use crate::media::MediaType;
+
 fn main() {
-    let config = Config::minimal();
+    let args: Vec<String> = std::env::args().collect();
 
-    #[allow(unused_variables)]
-    if let Ok(conf) = config {
-        println!("parsed config, starting...");
+    let config = {
+        if let Some(configfile) = args.get(0) {
+            Config::parse_file(configfile)
+        } else {
+            Config::minimal()
+        }
+    };
 
-        devices::poll(|event| {
-            println!("{:?}", event.event_type());
-            if let Some(media) = media_from_dev(&event.device()) {
+    match config {
+        Ok(conf) => {
+            println!("parsed config, starting...");
 
-                //let _ = media.process(&conf);
+            devices::poll(|event| {
+                match TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
+                    Ok(media) => {
 
-                println!("------------------------------------------------");
+                        //let _ = media.process(&conf);
 
-                thread::sleep(time::Duration::from_secs(10));
+                        println!("------------------------------------------------");
+                        println!("{}: {}", media.path(), media.title());
 
-                media.eject();
-            };
-        });
-    } else {
-        eprintln!("Error in config: {}", config.err().unwrap());
+                        thread::sleep(time::Duration::from_secs(2));
+
+                        println!("------------------------------------------------");
+                        media.eject();
+                    },
+                    _ => {}
+                }
+            });
+        }
+        Err(err) => {
+            panic!("error in config: {:?}", err);
+        }
     }
 }
