@@ -103,39 +103,32 @@ impl VideoDisc {
         let discnr_arg = format!("disc:{}", discnr);
         let minlength_arg = format!("--minlength={}", minlength);
         let args = if config.ripmethod == RipMethod::Backup && self.vtype == VideoType::Bluray {
-            // backup --decrypt ${mkv_args} -r disc:${discnr} ${rawpath} >> ${logfile}
+            // backup --decrypt ${mkv_args} -r disc:${discnr} ${rawpath}
             vec!["backup", "--decrypt", "-r", &discnr_arg, outpath.to_str().unwrap()]
         } else {
             // mkv ${mkv_args} -r --progress=-stdout --messages=-stdout dev:${devpath} all ${rawpath} --minlength=${minlength}
-            create_dir_all(outpath.clone())?;
-            //vec!["mkv", "-r", "--progress=-stdout", "--messages=-stdout", &discnr_arg, "all", outfile.to_str().unwrap(), &minlength_arg]
             vec!["mkv", "-r", "--progress=-stdout", "--messages=-stdout", &discnr_arg, "all", outpath.to_str().unwrap(), &minlength_arg]
         };
 
-        Command::new(&makemkvpath)
-            .args(args)
-            .args(config.mkv_args.clone())
-            // TODO: .stdout(logfile)
-            .status()
-            .map(|_| {
-                read_dir(outpath.clone()).map(|it| {
-                    let filesize = |file: PathBuf| file.metadata().unwrap().len();
-                    let files: Vec<PathBuf> = it.filter_map(|item| {
-                        match item {
-                            Ok(entry) if entry.path().is_file() => Some(entry.path()),
-                            _ => None,
-                        }
-                    }).collect();
+        if ! outpath.exists() {
+            create_dir_all(outpath.clone())?;
+            Command::new(&makemkvpath)
+                .args(args)
+                .args(config.mkv_args.clone())
+                // TODO: .stdout(logfile)
+                .status()
+                .map(|_| ())
+                .map_err(|err| anyhow!(err))?;
+        }
 
-                    // filter out files that are much smaller than the biggest one
-                    let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
-                    files.into_iter().filter(|file| {
-                        // TODO: remove filtered files?
-                        (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
-                    }).collect()
-                }).unwrap_or_else(|_| panic!("unable to read dir: {}", outpath.clone().to_str().unwrap()))
+        Ok(read_dir(outpath).map(|it| {
+            it.filter_map(|item| {
+                match item {
+                    Ok(entry) if entry.path().is_file() => Some(entry.path()),
+                    _ => None,
+                }
             })
-            .map_err(|err| anyhow!(err))
+        }).unwrap().collect())
     }
 
     /// Encode the Video Disc
@@ -172,6 +165,7 @@ impl VideoDisc {
         let outfile = finished_dir.join(format!("{}.{}", self.title, &config.extension));
 
         let infile = input_file.to_str().unwrap();
+
         Command::new(handbrakepath)
             .args(config_args)
             .args(extra_args)
@@ -203,15 +197,28 @@ impl MediaType for VideoDisc {
         println!("ripping to:        {}", ripdir.display());
         println!("finished files in: {}", finished_dir.display());
 
-        let rippedfiles = self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
+        self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
 
-        println!("ripped files:      {:?}", rippedfiles);
+        let proper_files: Vec<PathBuf> = read_dir(ripdir.clone()).map(|it| {
+            let filesize = |file: PathBuf| file.metadata().unwrap().len();
+            let files: Vec<PathBuf> = it.filter_map(|item| {
+                match item {
+                    Ok(entry) if entry.path().is_file() => Some(entry.path()),
+                    _ => None,
+                }
+            }).collect();
 
-        let finishedfiles = rippedfiles.iter().map(|rippedfile| {
-            self.encode(&config.handbrake, &rippedfile, finished_dir).unwrap();
-        });
+            // filter out files that are much smaller than the biggest one
+            let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
+            files.into_iter().filter(|file| {
+                // TODO: remove filtered files?
+                (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
+            }).collect()
+        }).unwrap_or_else(|_| panic!("unable to read dir: {}", ripdir.clone().to_str().unwrap()));
 
-        println!("finished files:    {:?}", finishedfiles);
+        let ripped_files: Vec<Result<PathBuf, anyhow::Error>> = proper_files.iter().map(|rippedfile| {
+            self.encode(&config.handbrake, &rippedfile, finished_dir)
+        }).collect();
 
         Ok(finished_dir.to_path_buf())
     }
