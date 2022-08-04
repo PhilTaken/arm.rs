@@ -61,9 +61,12 @@ impl Config {
     pub fn minimal() -> Result<Self, Error> {
         Self::parse_str(r#"
             [directories]
-            raw_rips_path = ""
-            transcode_files_path = ""
-            completed_files_path = ""
+            raw_rips_path = "."
+            transcode_files_path = "."
+            completed_files_path = "."
+
+            [make_mkv]
+            ripmethod = "Mkv"
         "#)
     }
 }
