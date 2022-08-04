@@ -15,32 +15,32 @@ use crate::media::MediaType;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    let config = {
-        if let Some(configfile) = args.get(1) {
-            Config::parse_file(configfile)
-        } else {
-            Config::minimal()
-        }
+    let config = match args.get(1) {
+        Some(configfile) => Config::parse_file(configfile),
+        _ => Config::minimal()
     };
 
     #[allow(unused_variables)]
-    if let Ok(conf) = config {
-        println!("parsed config, starting...");
+    match config {
+        Ok(conf) => {
+            println!("parsed config, starting...");
 
-        devices::poll(|event| {
-            if let Ok(media) = TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
-                //let _ = media.process(&conf);
+            devices::poll(|event| {
+                if let Ok(media) = TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
+                    //let _ = media.process(&conf);
 
-                println!("------------------------------------------------");
-                println!("{}: {}", media.path(), media.title());
+                    println!("------------------------------------------------");
+                    println!("{}: {}", media.path(), media.title());
 
-                thread::sleep(time::Duration::from_secs(2));
+                    thread::sleep(time::Duration::from_secs(2));
 
-                println!("------------------------------------------------");
-                media.eject();
-            }
-        });
-    } else {
-        eprintln!("Error in config: {}", config.err().unwrap());
+                    println!("------------------------------------------------");
+                    media.eject();
+                }
+            });
+        },
+        Err(err) => {
+            eprintln!("Error in config: {}", err);
+        }
     }
 }
