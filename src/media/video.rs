@@ -197,24 +197,19 @@ impl MediaType for VideoDisc {
         println!("ripping to:        {}", ripdir.display());
         println!("finished files in: {}", finished_dir.display());
 
-        self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
+        let rippedfiles = self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
 
-        let proper_files: Vec<PathBuf> = read_dir(ripdir.clone()).map(|it| {
+        // filter out files that are much smaller than the biggest one
+        let proper_files: Vec<PathBuf> = {
             let filesize = |file: PathBuf| file.metadata().unwrap().len();
-            let files: Vec<PathBuf> = it.filter_map(|item| {
-                match item {
-                    Ok(entry) if entry.path().is_file() => Some(entry.path()),
-                    _ => None,
-                }
-            }).collect();
+            let files: Vec<PathBuf> = rippedfiles.into_iter().filter(|file| { file.as_path().is_file() }).collect();
 
-            // filter out files that are much smaller than the biggest one
             let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
             files.into_iter().filter(|file| {
                 // TODO: remove filtered files?
                 (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
             }).collect()
-        }).unwrap_or_else(|_| panic!("unable to read dir: {}", ripdir.clone().to_str().unwrap()));
+        };
 
         let ripped_files: Vec<Result<PathBuf, anyhow::Error>> = proper_files.iter().map(|rippedfile| {
             self.encode(&config.handbrake, &rippedfile, finished_dir)
