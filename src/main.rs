@@ -39,8 +39,6 @@ fn main() {
                 }
             });
         },
-        Err(err) => {
-            eprintln!("Error in config: {}", err);
-        }
+        Err(err) => eprintln!("Error in config: {}", err)
     }
 }
