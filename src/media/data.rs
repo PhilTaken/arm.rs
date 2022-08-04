@@ -19,7 +19,7 @@ impl DataDisc {
 
 impl MediaType for DataDisc {
     #[allow(clippy::unused_self)]
-    fn process(&mut self, config: &Config) -> Result<PathBuf, Error> {
+    fn process(&self, config: &Config) -> Result<PathBuf, Error> {
         //self.rip(config);
         //self.encode(config);
         //Ok(())

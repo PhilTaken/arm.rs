@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
 
+use std::fs::{create_dir_all, read_dir};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use anyhow::Error;
@@ -68,22 +69,30 @@ impl VideoDisc {
             assert!(Path::new(&path).is_file());
             path
         } else {
-            let def = "HandBrakeCLI";
+            let def = "makemkvcon";
             if !in_path(def)? {
                 return Err(anyhow!("handbrake cli not in path"));
             };
             def.to_string()
         };
 
+
         let infile = self.path.to_str().unwrap();
         let outpath = ripdir.join(self.title.clone());
         let outfile = outpath.join(format!("{}.mkv", self.title));
 
+        // TOOD: catch no license error
         let cmdout = Command::new(&makemkvpath)
             .args(["-r", "info", "disc:9999"])
             .output().unwrap()
             .stdout;
         let discinfo = std::str::from_utf8(&cmdout).map_err(|_| anyhow!("failed to parse disc info"))?;
+
+        dbg!(discinfo);
+
+        if discinfo.contains("registration key") {
+            bail!("registration key missing");
+        }
 
         // extract the disc number
         let discnr = discinfo.lines()
@@ -97,8 +106,10 @@ impl VideoDisc {
             // backup --decrypt ${mkv_args} -r disc:${discnr} ${rawpath} >> ${logfile}
             vec!["backup", "--decrypt", "-r", &discnr_arg, outpath.to_str().unwrap()]
         } else {
-            // makemkvcon mkv ${mkv_args} -r --progress=-stdout --messages=-stdout dev:${devpath} all ${rawpath} --minlength=${minlength} >> ${logfile}
-            vec!["mkv", "-r", "--progress=-stdout", "--messages=-stdout", &discnr_arg, "all", outfile.to_str().unwrap(), &minlength_arg]
+            // mkv ${mkv_args} -r --progress=-stdout --messages=-stdout dev:${devpath} all ${rawpath} --minlength=${minlength}
+            create_dir_all(outpath.clone())?;
+            //vec!["mkv", "-r", "--progress=-stdout", "--messages=-stdout", &discnr_arg, "all", outfile.to_str().unwrap(), &minlength_arg]
+            vec!["mkv", "-r", "--progress=-stdout", "--messages=-stdout", &discnr_arg, "all", outpath.to_str().unwrap(), &minlength_arg]
         };
 
         Command::new(&makemkvpath)
@@ -106,9 +117,27 @@ impl VideoDisc {
             .args(config.mkv_args.clone())
             // TODO: .stdout(logfile)
             .status()
-            .map(|_| outfile)
+            .map(|_| {
+                read_dir(outpath.clone()).map(|it| {
+                    it
+                        .filter_map(|item| {
+                            match item {
+                                Ok(entry) if entry.path().is_file() => Some(entry.path()),
+                                _ => None,
+                            }
+                        })
+                        .reduce(|acc, elem| {
+                            let size = |file: &PathBuf| file.metadata().unwrap().len();
+                            if size(&elem) > size(&acc) {
+                                elem
+                            } else {
+                                acc
+                            }
+                        })
+                        .expect("empty directory, unable to fetch biggest file")
+                }).unwrap_or_else(|_| panic!("unable to read dir: {}", outpath.clone().to_str().unwrap()))
+            })
             .map_err(|err| anyhow!(err))
-
     }
 
     /// Encode the Video Disc
@@ -163,12 +192,20 @@ impl VideoDisc {
 impl MediaType for VideoDisc {
     /// process the Video Disc by first ripping it and then optionally (wip) encoding the ripped files
     #[allow(clippy::all)]
-    fn process(&mut self, config: &Config) -> Result<PathBuf, Error> {
+    fn process(&self, config: &Config) -> Result<PathBuf, Error> {
         let ripdir = Path::new(&config.directories.raw_rips_path);
         let finished_dir = Path::new(&config.directories.completed_files_path);
 
+        println!("ripdir: {}", ripdir.display());
+        println!("finished_dir: {}", finished_dir.display());
+
         let rippedfile = self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
+
+        println!("ripped to: {}", rippedfile.display());
+
         let finishedfile = self.encode(&config.handbrake, &rippedfile, finished_dir)?;
+
+        println!("encoded to: {}", finishedfile.display());
         Ok(finishedfile)
     }
 

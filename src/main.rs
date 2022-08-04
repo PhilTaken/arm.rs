@@ -1,3 +1,5 @@
+#![feature(is_some_with)]
+
 #[macro_use]
 extern crate anyhow;
 
@@ -27,11 +29,11 @@ fn main() {
 
             devices::poll(|event| {
                 if let Ok(media) = TryInto::<Box<dyn MediaType>>::try_into(event.device()) {
-                    //let _ = media.process(&conf);
 
                     println!("------------------------------------------------");
                     println!("{}: {}", media.path(), media.title());
 
+                    let _ = media.process(&conf);
                     thread::sleep(time::Duration::from_secs(2));
 
                     println!("------------------------------------------------");

@@ -18,7 +18,7 @@ use crate::config::Config;
 /// represents any type of Disc inserted into your drive
 pub trait MediaType {
     /// process the medium, a rip in most cases
-    fn process(&mut self, config: &Config) -> Result<PathBuf, Error>;
+    fn process(&self, config: &Config) -> Result<PathBuf, Error>;
 
     /// get the discs devnode
     fn path(&self) -> String;
