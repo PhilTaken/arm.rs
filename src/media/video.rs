@@ -202,10 +202,9 @@ impl MediaType for VideoDisc {
         // filter out files that are much smaller than the biggest one
         let proper_files: Vec<PathBuf> = {
             let filesize = |file: PathBuf| file.metadata().unwrap().len();
-            let files: Vec<PathBuf> = rippedfiles.into_iter().filter(|file| { file.as_path().is_file() }).collect();
 
-            let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
-            files.into_iter().filter(|file| {
+            let biggest_file = rippedfiles.clone().into_iter().map(filesize).max().unwrap();
+            rippedfiles.into_iter().filter(|file| {
                 // TODO: remove filtered files?
                 (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
             }).collect()
