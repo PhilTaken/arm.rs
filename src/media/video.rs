@@ -63,7 +63,7 @@ impl VideoDisc {
     /// # Arguments
     ///
     /// * `config` - config for the ripping process
-    pub fn rip(&self, config: &MakeMKVOptions, ripdir: &Path, minlength: i32) -> Result<PathBuf, Error> {
+    pub fn rip(&self, config: &MakeMKVOptions, ripdir: &Path, minlength: i32) -> Result<Vec<PathBuf>, Error> {
         // check if handbrake cli is available
         let makemkvpath = if let Some(path) = config.mkv_bin.clone() {
             assert!(Path::new(&path).is_file());
@@ -119,22 +119,18 @@ impl VideoDisc {
             .status()
             .map(|_| {
                 read_dir(outpath.clone()).map(|it| {
-                    it
-                        .filter_map(|item| {
-                            match item {
-                                Ok(entry) if entry.path().is_file() => Some(entry.path()),
-                                _ => None,
-                            }
-                        })
-                        .reduce(|acc, elem| {
-                            let size = |file: &PathBuf| file.metadata().unwrap().len();
-                            if size(&elem) > size(&acc) {
-                                elem
-                            } else {
-                                acc
-                            }
-                        })
-                        .expect("empty directory, unable to fetch biggest file")
+                    let filesize = |file: PathBuf| file.metadata().unwrap().len();
+                    let files: Vec<PathBuf> = it.filter_map(|item| {
+                        match item {
+                            Ok(entry) if entry.path().is_file() => Some(entry.path()),
+                            _ => None,
+                        }
+                    }).collect();
+                    let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
+
+                    files.into_iter().filter(|file| {
+                        (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
+                    }).collect()
                 }).unwrap_or_else(|_| panic!("unable to read dir: {}", outpath.clone().to_str().unwrap()))
             })
             .map_err(|err| anyhow!(err))
@@ -196,17 +192,20 @@ impl MediaType for VideoDisc {
         let ripdir = Path::new(&config.directories.raw_rips_path);
         let finished_dir = Path::new(&config.directories.completed_files_path);
 
-        println!("ripdir: {}", ripdir.display());
-        println!("finished_dir: {}", finished_dir.display());
+        println!("ripping to:        {}", ripdir.display());
+        println!("finished files in: {}", finished_dir.display());
 
-        let rippedfile = self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
+        let rippedfiles = self.rip(&config.make_mkv, ripdir, config.arm.minlength)?;
 
-        println!("ripped to: {}", rippedfile.display());
+        println!("ripped files:      {:?}", rippedfiles);
 
-        let finishedfile = self.encode(&config.handbrake, &rippedfile, finished_dir)?;
+        let finishedfiles = rippedfiles.iter().map(|rippedfile| {
+            self.encode(&config.handbrake, &rippedfile, finished_dir).unwrap();
+        });
 
-        println!("encoded to: {}", finishedfile.display());
-        Ok(finishedfile)
+        println!("finished files:    {:?}", finishedfiles);
+
+        Ok(finished_dir.to_path_buf())
     }
 
     fn path(&self) -> String {

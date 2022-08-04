@@ -33,7 +33,8 @@ fn main() {
                     println!("------------------------------------------------");
                     println!("{}: {}", media.path(), media.title());
 
-                    let _ = media.process(&conf);
+                    media.process(&conf).unwrap();
+
                     thread::sleep(time::Duration::from_secs(2));
 
                     println!("------------------------------------------------");
