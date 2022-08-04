@@ -21,11 +21,13 @@ The general structure should be very close to the original ARM described in the 
     - [x] identify type of disc inserted
     - [x] eject disks
 
-
-- [ ] Core functionality
+- [x] Core functionality (Movies)
     - [x] rip discs   (MakeMKV)
-    - [ ] encode rips (HandBrake)
+    - [x] encode rips (HandBrake)
 
+- [ ] Core functionality (Series)
+    - [ ] rip discs   (MakeMKV)
+    - [ ] encode rips (HandBrake)
 
 - [ ] Additional functionality
     - [ ] proper logging

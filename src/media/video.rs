@@ -126,9 +126,11 @@ impl VideoDisc {
                             _ => None,
                         }
                     }).collect();
-                    let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
 
+                    // filter out files that are much smaller than the biggest one
+                    let biggest_file = files.clone().into_iter().map(filesize).max().unwrap();
                     files.into_iter().filter(|file| {
+                        // TODO: remove filtered files?
                         (file.metadata().unwrap().len() as f64 - biggest_file as f64).abs() < 0.3 * biggest_file as f64
                     }).collect()
                 }).unwrap_or_else(|_| panic!("unable to read dir: {}", outpath.clone().to_str().unwrap()))
@@ -143,6 +145,8 @@ impl VideoDisc {
     /// * `config` - config for the encoding process
     #[allow(clippy::unused_self)]
     pub fn encode(&self, config: &HandBrakeOptions, input_file: &Path, finished_dir: &Path) -> Result<PathBuf, Error> {
+        println!("encoding file: {}", input_file.display());
+
         // check if handbrake cli is available
         let handbrakepath = if let Some(path) = config.binary.clone() {
             assert!(Path::new(&path).is_file());
@@ -174,7 +178,11 @@ impl VideoDisc {
             .args(["-i", infile, "-o", outfile.to_str().unwrap()])
             // TODO: .stdout(logfile)
             .status()
-            .map(|_| outfile)
+            .map(|_| {
+                // TODO: remove input file?
+                println!("done encoding file {} to {}", input_file.display(), outfile.display());
+                outfile
+            })
             .map_err(|err| anyhow!(err))
     }
 
