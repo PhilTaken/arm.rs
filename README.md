@@ -1,6 +1,6 @@
 # ARM.rs
 
-**Early WIP: Non-functional**
+**Early WIP: Semi-functional**
 
 ## Overview
 
@@ -33,3 +33,6 @@ The general structure should be very close to the original ARM described in the 
     - [ ] proper logging
     - [ ] send notifications (matrix/apprise/discord/etc.)
     - [ ] (webinterface)
+    - [ ] modes (rip / encode / server -> listen for udev)
+    - [ ] get metadata from online services
+    - [ ] properly name + tag movies / series
