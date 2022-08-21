@@ -10,8 +10,7 @@ mod devices;
 use core::time;
 use std::thread;
 
-use config::Config;
-
+use crate::config::Config;
 use crate::media::MediaType;
 
 fn main() {
